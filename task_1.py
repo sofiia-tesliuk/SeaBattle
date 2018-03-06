@@ -23,11 +23,39 @@ def is_valid(field):
     Returns if field is right.
     If not, then AssertionError.
     """
+    def right_ship(crd):
+        """
+        (tuple) -> (bool, size)
+        Returns if ship is correct and size of this ship.
+        """
+        if (has_ship(field, (crd[0] - 1, crd[1])) or
+                    has_ship(field, (crd[0] + 1, crd[1]))) and \
+               (has_ship(field, (crd[0], crd[1] - 1)) or
+                has_ship(field, (crd[0], crd[1] + 1))):
+            print("Invalid shape of ships.")
+            return (False, 0)
+        return (True, ship_size(field, crd))
+
     assert len(field) == 10, "Invalid size of field."
     for row in field:
         assert len(row) == 10, "Invalid size of field."
         for el in row:
             assert el in [' ', '*'], "Invalid chars in field"
+
+    # Checking ships in field
+    ships = {1: 0, 2: 0, 3: 0, 4: 0}
+    field = new_field(field)
+    for i in range(1, 11):
+        for j in range(1, 11):
+            try:
+                ship_info = right_ship((i, j))
+                if not ship_info[0]:
+                    return False
+                if ship_info[1] != 0:
+                    # Increase number of ships with such size
+                    ships[ship_info[1]] += 1
+            except KeyError:
+                return False
     return True
 
 
@@ -108,7 +136,7 @@ def field_to_str(field):
             if el:
                 line += '*'
             else:
-                line += ' '
+                line += '_'
         line += '\n'
     return line
 
@@ -142,17 +170,21 @@ def generate_field():
             # Down
             if side:
                 if (10 - crd[0]) >= size:
-                    for i in range(crd[0] + 1, crd[0] + size):
+                    for i in range(crd[0] + 1, crd[0] + size + 2):
                         for j in range(crd[1] - 1, crd[1] + 2):
                             if field[i][j]:
                                 return False
+                else:
+                    return False
             # Right
             else:
                 if (10 - crd[1]) >= size:
                     for i in range(crd[0] - 1, crd[0] + 2):
-                        for j in range(crd[1] + 1, crd[1] + size):
+                        for j in range(crd[1] + 1, crd[1] + size + 2):
                             if field[i][j]:
                                 return False
+                else:
+                    return False
             return True
 
         def new_ship_into_field(point, side, size):
@@ -172,7 +204,6 @@ def generate_field():
                 field[part[0]][part[1]] = True
 
         point = (random.randint(1, 10), random.randint(1, 10))
-        print(field_to_str(field))
         if is_new_ship(point):
             # 0 -- right, 1 -- down
             side = random.randint(0, 1)
@@ -187,7 +218,7 @@ def generate_field():
         else:
             new_ship(size)
 
-    field = [[False] * 12] * 12
+    field = [[False] * 12 for i in range(12)]
     # For each size put ship
     for size in range(4, 0, -1):
         number_of_ships = 5 - size
