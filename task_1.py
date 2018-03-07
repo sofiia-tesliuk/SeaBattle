@@ -29,9 +29,9 @@ def is_valid(field):
         Returns if ship is correct and size of this ship.
         """
         if (has_ship(field, (crd[0] - 1, crd[1])) or
-                    has_ship(field, (crd[0] + 1, crd[1]))) and \
-               (has_ship(field, (crd[0], crd[1] - 1)) or
-                has_ship(field, (crd[0], crd[1] + 1))):
+            has_ship(field, (crd[0] + 1, crd[1]))) and \
+                (has_ship(field, (crd[0], crd[1] - 1)) or
+                 has_ship(field, (crd[0], crd[1] + 1))):
             print("Invalid shape of ships.")
             return (False, 0)
         return (True, ship_size(field, crd))
@@ -40,7 +40,7 @@ def is_valid(field):
     for row in field:
         assert len(row) == 10, "Invalid size of field."
         for el in row:
-            assert el in [' ', '*'], "Invalid chars in field"
+            assert el in [' ', '*', 'X'], "Invalid chars in field"
 
     # Checking ships in field
     ships = {1: 0, 2: 0, 3: 0, 4: 0}
@@ -56,7 +56,7 @@ def is_valid(field):
                     ships[ship_info[1]] += 1
             except KeyError:
                 return False
-    return True
+    return ships == {1: 4, 2: 6, 3: 6, 4: 4}
 
 
 def new_field(field):
@@ -65,7 +65,7 @@ def new_field(field):
     Creates new field, more comfortable for further process.
     Has empty frame.
     """
-    field = [[el == '*' for el in row] for row in field]
+    field = [[el == ('*' or 'X') for el in row] for row in field]
     field = [[False] + row + [False] for row in field]
     field = [[False] * 12] + field + [[False] * 12]
     return field
@@ -126,17 +126,18 @@ def field_to_str(field):
     Returns string of field.
     Used for printing.
     """
+    if isinstance(field[0], str):
+        return '\n'.join(field)
     # First line of number coordinates
-    line = '  ' + ''.join([str(x) for x in range(1, 11)]) + '\n'
-    # Cut frame
-    for i, row in enumerate(field[1 : -1]):
+    line = '  ' + ' '.join([str(x) for x in range(1, 11)]) + '\n'
+    for i, row in enumerate(field):
         # Letter coordinate
         line += string.ascii_uppercase[i] + ' '
-        for el in row[1: -1]:
+        for el in row:
             if el:
-                line += '*'
+                line += '* '
             else:
-                line += '_'
+                line += '_ '
         line += '\n'
     return line
 
@@ -146,7 +147,7 @@ def generate_field():
     () -> (list)
     Generating field for sea battle.
     """
-    def new_ship(size):
+    def new_ship(size, number):
         """
         (int) -> changed field.
         Put new ship into field.
@@ -201,7 +202,7 @@ def generate_field():
                     ship.append((point[0], point[1] + i))
 
             for part in ship:
-                field[part[0]][part[1]] = True
+                field[part[0]][part[1]] = (number, not side, size)
 
         point = (random.randint(1, 10), random.randint(1, 10))
         if is_new_ship(point):
@@ -214,14 +215,20 @@ def generate_field():
                 if continue_ship(point, size - 1, side):
                     new_ship_into_field(point, side, size)
                 else:
-                    new_ship(size)
+                    new_ship(size, number)
         else:
-            new_ship(size)
+            new_ship(size, number)
 
     field = [[False] * 12 for i in range(12)]
+    number = 1
     # For each size put ship
     for size in range(4, 0, -1):
         number_of_ships = 5 - size
-        for number in range(number_of_ships):
-            new_ship(size)
+        for i in range(number_of_ships):
+            new_ship(size, number)
+            number += 1
+
+    # Cut from frame
+    field = field[1: -1]
+    field = list(map(lambda x: x[1: -1], field))
     return field
