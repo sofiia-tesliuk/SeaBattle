@@ -107,7 +107,7 @@ class Player:
         Initialisation
         :param index: player index
         """
-        self.__name = input('Enter you name, player {}: '.format(index))
+        self.__name = input('Enter your name, player {}: '.format(index))
 
     def read_position(self):
         """
