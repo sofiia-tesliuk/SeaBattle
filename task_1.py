@@ -45,8 +45,8 @@ def is_valid(field):
     # Checking ships in field
     ships = {1: 0, 2: 0, 3: 0, 4: 0}
     field = new_field(field)
-    for i in range(1, 11):
-        for j in range(1, 11):
+    for i in range(10):
+        for j in range(10):
             try:
                 ship_info = right_ship((i, j))
                 if not ship_info[0]:
