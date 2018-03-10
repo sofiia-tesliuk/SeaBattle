@@ -33,7 +33,7 @@ def is_valid(field):
                 (has_ship(field, (crd[0], crd[1] - 1)) or
                  has_ship(field, (crd[0], crd[1] + 1))):
             print("Invalid shape of ships.")
-            return (False, 0)
+            return (False, [0, 0])
         return (True, ship_size(field, crd))
 
     assert len(field) == 10, "Invalid size of field."
@@ -51,9 +51,9 @@ def is_valid(field):
                 ship_info = right_ship((i, j))
                 if not ship_info[0]:
                     return False
-                if ship_info[1] != 0:
+                if ship_info[1] != [0, 0]:
                     # Increase number of ships with such size
-                    ships[ship_info[1]] += 1
+                    ships[max(ship_info[1])] += 1
             except KeyError:
                 return False
     return ships == {1: 4, 2: 6, 3: 6, 4: 4}
@@ -63,11 +63,8 @@ def new_field(field):
     """
     (list) -> (list)
     Creates new field, more comfortable for further process.
-    Has empty frame.
     """
     field = [[el == ('*' or 'X') for el in row] for row in field]
-    field = [[False] + row + [False] for row in field]
-    field = [[False] * 12] + field + [[False] * 12]
     return field
 
 
@@ -77,7 +74,7 @@ def normal_coordinates(crd):
     Returns coordinates with first coordinate as int.
     """
     if not isinstance(crd[0], int):
-        return (ord(crd[0]) - ord('A') + 1, crd[1])
+        return (ord(crd[0]) - ord('A'), crd[1] - 1)
     else:
         return crd
 
@@ -88,7 +85,7 @@ def valid_coordinates(crd):
     Returns if coordinates are possible.
     """
     crd = normal_coordinates(crd)
-    return (1 <= crd[0] <= 10) and (1 <= crd[1] <= 10)
+    return (0 <= crd[0] < 10) and (0 <= crd[1] < 10)
 
 
 def has_ship(field, crd):
@@ -100,23 +97,24 @@ def has_ship(field, crd):
     return field[crd[0]][crd[1]]
 
 
-def ship_size(field, crd, pre_crd=(0, 0)):
+def ship_size(field, crd, pre_crd=(-1, -1)):
     """
     (list, tuple) ->  (int)
     Returns size of ship be coordinates.
     """
     crd = normal_coordinates(crd)
-    size = 0
+    size = [0, 0]
     if valid_coordinates(crd) and has_ship(field, crd):
         if (crd[0] - 1, crd[1]) != pre_crd:
-            size += ship_size(field, (crd[0] - 1, crd[1]), crd)
+            size[1] += ship_size(field, (crd[0] - 1, crd[1]), crd)[1]
         if (crd[0] + 1, crd[1]) != pre_crd:
-            size += ship_size(field, (crd[0] + 1, crd[1]), crd)
+            size[1] += ship_size(field, (crd[0] + 1, crd[1]), crd)[1]
         if (crd[0], crd[1] - 1) != pre_crd:
-            size += ship_size(field, (crd[0], crd[1] - 1), crd)
+            size[0] += ship_size(field, (crd[0], crd[1] - 1), crd)[0]
         if (crd[0], crd[1] + 1) != pre_crd:
-            size += ship_size(field, (crd[0], crd[1] + 1), crd)
-        size += 1
+            size[0] += ship_size(field, (crd[0], crd[1] + 1), crd)[0]
+        size[0] += 1
+        size[1] += 1
     return size
 
 
