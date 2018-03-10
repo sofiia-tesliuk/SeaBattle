@@ -35,4 +35,4 @@ So, now about special symbols:<br>
 X -- hit part of not completely hit ship.<br>
 ■ -- hit part of completely hit ship.<br>
 
-Hope, you enhoyed this game!)
+Hope, you enjoyed this game!)
