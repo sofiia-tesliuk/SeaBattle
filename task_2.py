@@ -41,7 +41,7 @@ class Game:
         :param index: player index
         :return: have won current player (bool)
         """
-        return self.__fields[index].hit_all_ships
+        return self.__fields[self.next_player()].hit_all_ships
 
     def field_without_ships(self, index):
         """
